@@ -25,7 +25,7 @@ import json
 import logging
 from typing import Any, Dict
 
-import asyncio_mqtt as aiomqtt
+import aiomqtt
 
 
 async def main(queue: asyncio.Queue, args: Dict[str, Any]):
@@ -70,8 +70,8 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
                 try:
                     data = json.loads(message.payload.decode())
                     await queue.put(data)
-                except json.decoder.JSONDecodeError as e:
-                    logger.error(e)
+                except json.decoder.JSONDecodeError as json_exception:
+                    logger.error(json_exception)
     finally:
         logger.info("Disconneccting from broker")
         mqtt_consumer.disconnect()
