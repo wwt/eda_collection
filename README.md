@@ -12,6 +12,10 @@ The following plugins are included in the collection
 |-|-|
 | wwt.eda.mqtt | MQTT Event Source Plugin |
 
+## Python Dependencies
+
+See `requirements.txt` for python dependencies.
+
 ## Usage
 
 A sample rulebook using *wwt.eda.mqtt* plugin is shown below
