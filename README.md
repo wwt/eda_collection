@@ -1,6 +1,6 @@
 # Event Driven Automation Collection - wwt.eda
 
-This collection is originally based off of the work done by Alessandro Rossi (<https://github.com/kubealex>).
+This collection is originally based off of the work done by Alessandro Rossi (<https://github.com/kubealex>) and his MQTT event-source plugin.
 
 The goal of this collection is to provide a variety of event-source plugins and filters for Event-Driven Ansible.
 
