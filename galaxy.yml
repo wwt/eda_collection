@@ -1,33 +1,21 @@
 ---
-
-namespace: kubealex
-
+namespace: wwt
 name: eda
-
-version: 1.0.2
-
+version: 1.0.0
 readme: README.md
-
 authors:
-  - Alessandro Rossi <al.rossi87@gmail.com>
-
+  - Nick Thompson <nick.thompson@wwt.com>
 description: Event Driven Automation
-
 license_file: 'LICENSE'
-
 tags:
   - eda
   - ansible
   - events
   - mqtt
   - infrastructure
-
 # dependencies:
-
-repository: https://github.com/kubealex/kubealex.eda
-
-documentation: https://github.com/kubealex/kubealex.eda.git
-
-issues: https://github.com/kubealex/kubealex.eda.git/issues
-
+homepage: https://www.wwt.com/
+repository: https://github.com/wwt/eda_collection
+documentation: https://github.com/wwt/eda_collection
+issues: https://github.com/wwt/eda_collection/issues
 build_ignore: []

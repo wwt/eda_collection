@@ -1,7 +1,8 @@
-# Event Driven Automation Collection - kubealex.eda
+# Event Driven Automation Collection - wwt.eda
 
-This collection was born with the idea to group some plugins and resources that can be helpful in extending the Event Driven Automation collection.
+This collection is originally based off of the work done by Alessandro Rossi (<https://github.com/kubealex>) and his MQTT event-source plugin.
 
+The goal of this collection is to provide a variety of event-source plugins and filters for Event-Driven Ansible.
 
 ## Plugins
 
@@ -9,22 +10,47 @@ The following plugins are included in the collection
 
 | Name | Description |
 |-|-|
-| kubealex.eda.mqtt | Configure MQTT listener for events |
+| wwt.eda.mqtt | MQTT Event Source Plugin |
+
+## Python Dependencies
+
+See `requirements.txt` for python dependencies.
 
 ## Usage
 
-A sample rulebook using *kubealex.eda.mqtt* plugin is shown below
+A sample rulebook using *wwt.eda.mqtt* plugin is shown below
 
-    ---
-    - name: Hello Events
-        hosts: all
-        sources:
-        - kubealex.eda.mqtt:
-            host: localhost
-            port: 1883
-            topic: anomaly-data-out
-        rules:
-        - name: Debug connection
-        condition: event.sensor_location is defined
-        action:
-            debug:
+```yaml
+---
+- name: Meraki MT30 Sensor Button Presses
+  hosts: all
+  sources:
+    - wwt.eda.mqtt:
+        host: <host>
+        port: 8883
+        username: <username>
+        password: <password>
+        ca_certs: <path/to/cert>
+        validate_certs: false
+        topic: meraki/v1/mt/#
+      filters:
+        - compare_mqtt_timestamp:
+  rules:
+    - name: Button Long Press
+      condition: event.action == "longPress" and event.timestamps.msg_age < 10
+      action:
+        run_job_template:
+          name: Unconfigure Demo Environment
+          organization: Meraki-Demo
+    - name: Button Short Press
+      condition: event.action == "shortPress" and event.timestamps.msg_age < 10
+      action:
+        run_job_template:
+          name: Send Webex Teams Message
+          organization: Meraki-Demo
+          job_args:
+            extra_vars:
+              source_device: "demo-mt30"
+              camera_name: "demo-mv2"
+              webex_room_name: "WWT Ansible EDA Demo"
+```
