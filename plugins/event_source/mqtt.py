@@ -23,27 +23,12 @@ Arguments:
 import asyncio
 import json
 import logging
-from typing import Optional
+from typing import Any, Dict
 
-from pydantic import BaseModel
 import aiomqtt
 
 
-class ArgSpec(BaseModel):
-    host: str
-    port: str
-    username: Optional[str] = None
-    password: Optional[str] = None
-    topic: str
-    # Certificate Requirements
-    ca_certs: Optional[str] = None
-    validate_certs: Optional[bool] = None
-    certfile: Optional[str] = None
-    keyfile: Optional[str] = None
-    keyfile_password: Optional[str] = None
-
-
-async def main(queue: asyncio.Queue, args: ArgSpec):
+async def main(queue: asyncio.Queue, args: Dict[str, Any]):
     logger = logging.getLogger()
 
     topic = args.get("topic")
