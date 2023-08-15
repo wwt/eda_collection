@@ -61,18 +61,23 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
             for dirname in dirs:
                 if cert_path in dirname:
                     path_to_certs = os.path.join(root, dirname)
+                    logger.info("Cert path found at %s", path_to_certs)
 
     # Build out cert file absolute paths
     if ca_certs and path_to_certs:
         ca_certs_path = f'{path_to_certs}/{ca_certs}'
+        logger.info("ca_certs path found at %s", ca_certs_path)
 
     if certfile and path_to_certs:
         certfile_path = f'{path_to_certs}/{certfile}'
+        logger.info("certfile path found at %s", certfile_path)
 
     if keyfile and path_to_certs:
         keyfile_path = f'{path_to_certs}/{keyfile}'
+        logger.info("keyfile path found at %s", keyfile_path)
 
     if ca_certs_path or certfile_path or keyfile_path:
+        logger.info("Certificates provided, setting tls_params...")
         tls_params = aiomqtt.TLSParameters(
             ca_certs=ca_certs_path,
             certfile=certfile_path,
@@ -80,13 +85,16 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
             keyfile_password=keyfile_password,
             cert_reqs=validate_certs if validate_certs is not None else True
         )
+    else:
+        logger.info("Certificates not provided, setting tls_params to None...")
+        tls_params = None
 
     mqtt_consumer = aiomqtt.Client(
         hostname=host,
         port=port,
         username=username,
         password=password,
-        tls_params=tls_params if ca_certs else None
+        tls_params=tls_params
     )
 
     await mqtt_consumer.connect()
