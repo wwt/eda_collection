@@ -39,7 +39,8 @@ A sample rulebook using *wwt.eda.mqtt* plugin is shown below:
         port: 8883
         username: <username>
         password: <password>
-        ca_certs: <path/to/cert>
+        cert_path: <cert directory name>
+        ca_certs: <cert-filename>
         validate_certs: false
         topic: meraki/v1/mt/#
       filters:

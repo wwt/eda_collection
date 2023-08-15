@@ -1,7 +1,7 @@
 ---
 namespace: wwt
 name: eda
-version: 1.0.2
+version: 1.0.3
 readme: README.md
 authors:
   - Nick Thompson <nick.thompson@wwt.com>
