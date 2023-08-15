@@ -6,15 +6,17 @@ Arguments:
     port:               The port where the mqtt server is listening
     username:           The username to connect to the broker
     password:           The password to connect to the broker
-    ca_certs            The optional certificate authority file path containing
+    cert_path:          The directory containing certificate files.
+                        Can be in root of repo or under rulebooks.
+    ca_certs:           The filename of optional certificate authority file containing
                         certificate used to sign mqtt broker certificates
-    validate_certs      Disable certificate validation - true/false
-    certfile            The optional client certificate file path containing
+    validate_certs:     Disable certificate validation - true/false
+    certfile:           The optional client certificate file name containing
                         the client certificate, as well as CA certificates needed
                         to establish the certificate's authenticity
-    keyfile             The optional client key file path containing the client
+    keyfile:            The optional client key file name containing the client
                         private key
-    keyfile_password    The optional password to be used when loading the
+    keyfile_password:   The optional password to be used when loading the
                         certificate chain
     topic:              The mqtt topic to subscribe to
 
@@ -23,6 +25,7 @@ Arguments:
 import asyncio
 import json
 import logging
+import os
 from typing import Any, Dict
 
 import aiomqtt
@@ -38,17 +41,42 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
     username = args.get("username")
     password = args.get("password")
 
+    cert_path = args.get("cert_path")
     ca_certs = args.get("ca_certs")
     validate_certs = bool(args.get("validate_certs"))
     certfile = args.get("certfile")
     keyfile = args.get("keyfile")
     keyfile_password = args.get("keyfile_password")
 
-    if ca_certs:
+    # Path management for certificate files
+    # This solves an issue when using EDA server and finding file paths
+    path_to_certs = None
+    ca_certs_path = None
+    certfile_path = None
+    keyfile_path = None
+
+    if cert_path:
+        # Find the absolute path to the ca_certs filename
+        for root, dirs, _ in os.walk('./', topdown=True):
+            for dirname in dirs:
+                if cert_path in dirname:
+                    path_to_certs = os.path.join(root, dirname)
+
+    # Build out cert file absolute paths
+    if ca_certs and path_to_certs:
+        ca_certs_path = f'{path_to_certs}/{ca_certs}'
+
+    if certfile and path_to_certs:
+        certfile_path = f'{path_to_certs}/{certfile}'
+
+    if keyfile and path_to_certs:
+        keyfile_path = f'{path_to_certs}/{keyfile}'
+
+    if ca_certs_path or certfile_path or keyfile_path:
         tls_params = aiomqtt.TLSParameters(
-            ca_certs=ca_certs,
-            certfile=certfile,
-            keyfile=keyfile,
+            ca_certs=ca_certs_path,
+            certfile=certfile_path,
+            keyfile=keyfile_path,
             keyfile_password=keyfile_password,
             cert_reqs=validate_certs if validate_certs is not None else True
         )
