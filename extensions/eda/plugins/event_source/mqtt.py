@@ -62,6 +62,7 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
                 if cert_path in dirname:
                     path_to_certs = os.path.join(root, dirname)
                     logger.info("Cert path found at %s", path_to_certs)
+                    break
 
     # Build out cert file absolute paths
     if ca_certs and path_to_certs:
