@@ -6,15 +6,13 @@ Arguments:
     port:               The port where the mqtt server is listening
     username:           The username to connect to the broker
     password:           The password to connect to the broker
-    cert_path:          The directory containing certificate files.
-                        Can be in root of repo or under rulebooks.
-    ca_certs:           The filename of optional certificate authority file containing
+    ca_certs:           Multi-line string containing
                         certificate used to sign mqtt broker certificates
     validate_certs:     Disable certificate validation - true/false
-    certfile:           The optional client certificate file name containing
+    certfile:           The optional multi-line string containing
                         the client certificate, as well as CA certificates needed
                         to establish the certificate's authenticity
-    keyfile:            The optional client key file name containing the client
+    keyfile:            Multi-line string containing the client
                         private key
     keyfile_password:   The optional password to be used when loading the
                         certificate chain
@@ -25,11 +23,23 @@ Arguments:
 import asyncio
 import json
 import logging
-import os
 from typing import Any, Dict
 
 import aiomqtt
 
+
+async def write_certfile(path, content, logger):
+    """
+    Function to write certificate data to a temporary file.
+
+    Args:
+        path (str): Path to temporary file
+        content (str): Certificate data
+        logger (object): Logger object
+    """
+    with open(path, "w+", encoding='utf-8') as certfile:
+        certfile.writelines(content)
+    logger.info("Cert data written to %s", path)
 
 async def main(queue: asyncio.Queue, args: Dict[str, Any]):
     logger = logging.getLogger()
@@ -41,7 +51,6 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
     username = args.get("username")
     password = args.get("password")
 
-    cert_path = args.get("cert_path")
     ca_certs = args.get("ca_certs")
     validate_certs = bool(args.get("validate_certs"))
     certfile = args.get("certfile")
@@ -49,33 +58,29 @@ async def main(queue: asyncio.Queue, args: Dict[str, Any]):
     keyfile_password = args.get("keyfile_password")
 
     # Path management for certificate files
-    # This solves an issue when using EDA server and finding file paths
-    path_to_certs = None
+    # EDA Server does not support file handling with decision environments
+    # We will accept the cert data as strings and write out temporary files
+    # to pass when configuring TLS.
+    path_to_certs = "/tmp"
     ca_certs_path = None
     certfile_path = None
     keyfile_path = None
 
-    if cert_path:
-        # Find the absolute path to the ca_certs filename
-        for root, dirs, _ in os.walk('./', topdown=True):
-            for dirname in dirs:
-                if cert_path in dirname:
-                    path_to_certs = os.path.join(root, dirname)
-                    logger.info("Cert path found at %s", path_to_certs)
-                    break
-
-    # Build out cert file absolute paths
+    # Build out cert file and absolute paths
     if ca_certs and path_to_certs:
-        ca_certs_path = f'{path_to_certs}/{ca_certs}'
-        logger.info("ca_certs path found at %s", ca_certs_path)
+        # Write Certificate to file
+        ca_certs_path = f'{path_to_certs}/ca_certs.crt'
+        await write_certfile(ca_certs_path, ca_certs, logger)
 
     if certfile and path_to_certs:
-        certfile_path = f'{path_to_certs}/{certfile}'
-        logger.info("certfile path found at %s", certfile_path)
+        # Write Certificate to file
+        certfile_path = f'{path_to_certs}/certfile.crt'
+        await write_certfile(certfile_path, certfile, logger)
 
     if keyfile and path_to_certs:
-        keyfile_path = f'{path_to_certs}/{keyfile}'
-        logger.info("keyfile path found at %s", keyfile_path)
+        # Write Certificate to file
+        keyfile_path = f'{path_to_certs}/keyfile.crt'
+        await write_certfile(keyfile_path, keyfile, logger)
 
     if ca_certs_path or certfile_path or keyfile_path:
         logger.info("Certificates provided, setting tls_params...")
