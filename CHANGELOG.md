@@ -15,3 +15,7 @@ Fixed certificate path handling when calling wwt.eda.mqtt from EDA server
 ## v1.0.4
 
 Added additional logging to wwt.eda.mqtt plugin.
+
+## v1.0.5
+
+Fixed certificate handling with wwt.eda.mqtt to account for EDA server file limitations.
